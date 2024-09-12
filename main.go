@@ -54,7 +54,7 @@ func showMovieDetails(db *sql.DB, imdbID string) error {
 	var rating float64
 	var poster NullString
 
-	err := db.QueryRow("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?", imdbID).Scan(&imdb_id, &title, &year, &rating, &poster)
+	err := db.QueryRow("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?", imdbID).Scan(&imdb_id, &title, &rating, &year, &poster)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println("Movie not found")
