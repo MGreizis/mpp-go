@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const dbPath = "./data/movies.db"
+const dbPath = "./movies.db"
 
 func openDB() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", dbPath)
