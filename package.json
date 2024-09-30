@@ -1,0 +1,17 @@
+{
+  "name": "foss-imdb",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently \"cd backend && ./main\" \"cd frontend && npm run dev\"",
+    "build": "cd frontend && npm run build",
+    "start:backend": "cd backend && go run main.go",
+    "start:frontend": "cd frontend && npm run dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
