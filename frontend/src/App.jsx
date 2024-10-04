@@ -10,12 +10,14 @@ function App() {
     rating: '',
     poster: ''
   })
+  const [sortBy, setSortBy] = useState('year');
+  const [order, setOrder] = useState('asc');
   const [movieDetails, setMovieDetails] = useState(null);
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await fetch('http://localhost:8090/movies');
+        const response = await fetch(`http://localhost:8090/movies?sort=${sortBy}&order=${order}`);
         const data = await response.json();
         setMovies(data);
       } catch (error) {
@@ -23,7 +25,7 @@ function App() {
       }
     };
     fetchMovies();
-  }, []);
+  }, [sortBy, order]);
 
   /**
    * Handles submitting the form for adding a movie.
@@ -151,6 +153,24 @@ function App() {
           Add Movie
         </button>
       </form>
+
+      <div className="flex space-x-4 mb-4">
+        <div>
+          <label className="text-white">Sort by: </label>
+          <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="ml-2 px-2 py-1 rounded">
+            <option value="year">Year</option>
+            <option value="rating">Rating</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="text-white">Order: </label>
+          <select value={order} onChange={(e) => setOrder(e.target.value)} className="ml-2 px-2 py-1 rounded">
+            <option value="asc">Ascending</option>
+            <option value="desc">Descending</option>
+          </select>
+        </div>
+      </div>
 
       <h1 className="text-3xl font-bold text-center mb-6 text-white">Movie List</h1>
       <p className="text-center mb-6 text-white">FYI, the details of the movie show up at the bottom of the page :/ (will be fixed soon)</p>

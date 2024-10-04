@@ -200,7 +200,7 @@ func handleListMovies(w http.ResponseWriter, r *http.Request) {
 	defer db.Close()
 
 	queryParams := r.URL.Query()
-	sortBy := queryParams.Get("year")
+	sortBy := queryParams.Get("sort")
 	order := queryParams.Get("order")
 
 	if sortBy != "rating" && sortBy != "year" {
