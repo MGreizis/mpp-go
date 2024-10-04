@@ -38,16 +38,33 @@ func addMovie(db *sql.DB, imdbID, title string, year int, rating float64) error 
 }
 
 // listMovies lists all movies in the database at dbPath.
-func listMovies(db *sql.DB) error {
-	rows, err := db.Query("SELECT Title FROM movies")
+func listMovies(db *sql.DB, sortBy string, order string) error {
+	query := "SELECT Title, Year, Rating FROM movies"
+
+	if sortBy == "year" {
+		query += " ORDER BY Year"
+	} else if sortBy == "rating" {
+		query += " ORDER BY Rating"
+	}
+
+	if order == "desc" {
+		query += " DESC"
+	} else {
+		query += " ASC"
+	}
+
+	rows, err := db.Query(query)
 	if err != nil {
 		return err
 	}
 	defer rows.Close()
 
+	// Print out the movie titles
 	for rows.Next() {
 		var title string
-		if err := rows.Scan(&title); err != nil {
+		var year int
+		var rating float64
+		if err := rows.Scan(&title, &year, &rating); err != nil {
 			return err
 		}
 		fmt.Println(title)
@@ -182,7 +199,33 @@ func handleListMovies(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies")
+	queryParams := r.URL.Query()
+	sortBy := queryParams.Get("year")
+	order := queryParams.Get("order")
+
+	if sortBy != "rating" && sortBy != "year" {
+		sortBy = "year"
+	}
+
+	if order != "asc" && order != "desc" {
+		order = "asc"
+	}
+
+	query := "SELECT IMDb_id, Title, Rating, Year, Poster FROM movies"
+
+	if sortBy == "year" {
+		query += " ORDER BY Year"
+	} else if sortBy == "rating" {
+		query += " ORDER BY Rating"
+	}
+
+	if order == "desc" {
+		query += " DESC"
+	} else {
+		query += " ASC"
+	}
+
+	rows, err := db.Query(query)
 	if err != nil {
 		http.Error(w, "Could not fetch movies", http.StatusInternalServerError)
 		return
@@ -284,6 +327,10 @@ func main() {
 	deleteCommand := flag.NewFlagSet("delete", flag.ExitOnError)
 	deleteImdbId := deleteCommand.String("imdbid", "tt0000001", "The IMDb ID of a movie or series")
 
+	listCommand := flag.NewFlagSet("list", flag.ExitOnError)
+	sortBy := listCommand.String("sort", "year", "Sort movies by 'year' or 'rating'")
+	order := listCommand.String("order", "asc", "Order 'asc' or 'desc'")
+
 	if len(arguments) == 0 {
 		// Start server
 		router := mux.NewRouter()
@@ -317,7 +364,8 @@ func main() {
 		fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: null\n", *addImdbId, *addTitle, *addImdbRating, *addYear)
 
 	case "list":
-		err := listMovies(db)
+		listCommand.Parse(arguments[1:])
+		err := listMovies(db, *sortBy, *order)
 		if err != nil {
 			log.Fatal(err)
 		}
