@@ -82,14 +82,11 @@ func listMovies(db *sql.DB, sortBy string, order string, filterYear int) error {
 
 	// Print out the movie titles
 	for rows.Next() {
-		var title string
-		var year int
-		var rating float64
-		// var movie Movie
-		if err := rows.Scan(&title, &year, &rating); err != nil {
+		var movie Movie
+		if err := rows.Scan(&movie.Title, &movie.Year, &movie.Rating); err != nil {
 			return err
 		}
-		fmt.Println(title)
+		fmt.Println(movie.Title)
 	}
 	return nil
 }
@@ -99,12 +96,9 @@ func listMovies(db *sql.DB, sortBy string, order string, filterYear int) error {
 // If the movie is not found, it prints "Movie not found" and returns nil.
 // If there is another error, it returns the error.
 func showMovieDetails(db *sql.DB, imdbID string) error {
-	var imdb_id, title string
-	var year int
-	var rating float64
-	var poster NullString
+	var movie Movie
 
-	err := db.QueryRow("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?", imdbID).Scan(&imdb_id, &title, &rating, &year, &poster)
+	err := db.QueryRow("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?", imdbID).Scan(&movie.IMDb_id, &movie.Title, &movie.Rating, &movie.Year, &movie.Poster)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			fmt.Println("Movie not found")
@@ -112,9 +106,9 @@ func showMovieDetails(db *sql.DB, imdbID string) error {
 		}
 		return err
 	}
-	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\n", imdb_id, title, rating, year)
-	if poster.Valid {
-		fmt.Printf("Poster: %s\n", poster.String)
+	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\n", movie.IMDb_id, movie.Title, movie.Rating, movie.Year)
+	if movie.Poster.Valid {
+		fmt.Printf("Poster: %s\n", movie.Poster.String)
 	} else {
 		fmt.Println("Poster:") // yuck, but have to do this for tests to pass (hopefully)
 	}
