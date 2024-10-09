@@ -37,23 +37,44 @@ func addMovie(db *sql.DB, imdbID, title string, year int, rating float64) error 
 	return err
 }
 
-// listMovies lists all movies in the database at dbPath.
-func listMovies(db *sql.DB, sortBy string, order string) error {
+// listMovies executes a query against the movies table of the SQLite database
+// at dbPath that lists movies according to the given parameters.
+//
+// It takes the following parameters:
+//   - db: the SQLite database to query
+//   - sortBy: the field to sort the movies by, either "year" or "rating"
+//   - order: the order to sort the movies in, either "asc" or "desc"
+//   - filterYear: the year to filter the movies by, or 0 to not filter
+//
+// It returns an error if the query cannot be executed.
+func listMovies(db *sql.DB, sortBy string, order string, filterYear int) error {
 	query := "SELECT Title, Year, Rating FROM movies"
+	var args []interface{}
 
-	if sortBy == "year" {
-		query += " ORDER BY Year"
-	} else if sortBy == "rating" {
-		query += " ORDER BY Rating"
+	if filterYear != 0 {
+		query += " WHERE Year = ?"
+		args = append(args, filterYear)
 	}
 
-	if order == "desc" {
-		query += " DESC"
-	} else {
-		query += " ASC"
+	if filterYear == 0 {
+		query = "SELECT Title, Year, Rating FROM movies"
 	}
 
-	rows, err := db.Query(query)
+	if sortBy != "" {
+		if sortBy == "year" {
+			query += " ORDER BY Year"
+		} else if sortBy == "rating" {
+			query += " ORDER BY Rating"
+		}
+
+		if order == "desc" {
+			query += " DESC"
+		} else {
+			query += " ASC"
+		}
+	}
+
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		return err
 	}
@@ -64,6 +85,7 @@ func listMovies(db *sql.DB, sortBy string, order string) error {
 		var title string
 		var year int
 		var rating float64
+		// var movie Movie
 		if err := rows.Scan(&title, &year, &rating); err != nil {
 			return err
 		}
@@ -187,10 +209,20 @@ func enableCORS(next http.Handler) http.Handler {
 	})
 }
 
-// handleListMovies lists all movies in the database at dbPath. It takes a
-// http.ResponseWriter as argument and writes the movies in JSON format to it.
-// It returns an HTTP error if the database cannot be opened, or if the movies
-// cannot be fetched.
+// handleListMovies handles the GET /movies endpoint. It returns the list of
+// movies in the database, sorted by the given criteria. The query parameters
+// are:
+//
+//   - `sort`: the column to sort by. Either "year" or "rating". If not
+//     specified, defaults to "year".
+//   - `order`: the order of the sort. Either "asc" or "desc". If not
+//     specified, defaults to "asc".
+//   - `year`: the year to filter movies by. If specified, only movies with
+//     this year will be returned.
+//
+// If the database cannot be opened or the movies cannot be fetched, it
+// returns an HTTP error. Otherwise, it returns the list of movies in JSON
+// format with the HTTP status 200 OK.
 func handleListMovies(w http.ResponseWriter, r *http.Request) {
 	db, err := openDB()
 	if err != nil {
@@ -202,30 +234,31 @@ func handleListMovies(w http.ResponseWriter, r *http.Request) {
 	queryParams := r.URL.Query()
 	sortBy := queryParams.Get("sort")
 	order := queryParams.Get("order")
-
-	if sortBy != "rating" && sortBy != "year" {
-		sortBy = "year"
-	}
-
-	if order != "asc" && order != "desc" {
-		order = "asc"
-	}
+	year := queryParams.Get("year")
 
 	query := "SELECT IMDb_id, Title, Rating, Year, Poster FROM movies"
+	var args []interface{}
 
-	if sortBy == "year" {
-		query += " ORDER BY Year"
-	} else if sortBy == "rating" {
-		query += " ORDER BY Rating"
+	if year != "" {
+		query += " WHERE Year = ?"
+		args = append(args, year)
 	}
 
-	if order == "desc" {
-		query += " DESC"
-	} else {
-		query += " ASC"
+	if sortBy != "" {
+		if sortBy == "year" {
+			query += " ORDER BY Year"
+		} else if sortBy == "rating" {
+			query += " ORDER BY Rating"
+		}
+
+		if order == "desc" {
+			query += " DESC"
+		} else {
+			query += " ASC"
+		}
 	}
 
-	rows, err := db.Query(query)
+	rows, err := db.Query(query, args...)
 	if err != nil {
 		http.Error(w, "Could not fetch movies", http.StatusInternalServerError)
 		return
@@ -328,8 +361,9 @@ func main() {
 	deleteImdbId := deleteCommand.String("imdbid", "tt0000001", "The IMDb ID of a movie or series")
 
 	listCommand := flag.NewFlagSet("list", flag.ExitOnError)
-	sortBy := listCommand.String("sort", "year", "Sort movies by 'year' or 'rating'")
-	order := listCommand.String("order", "asc", "Order 'asc' or 'desc'")
+	sortBy := listCommand.String("sort", "", "Sort movies by 'year' or 'rating'")
+	order := listCommand.String("order", "", "Order 'asc' or 'desc'")
+	filterYear := listCommand.Int("year", 0, "Filter movies by year")
 
 	if len(arguments) == 0 {
 		// Start server
@@ -365,7 +399,7 @@ func main() {
 
 	case "list":
 		listCommand.Parse(arguments[1:])
-		err := listMovies(db, *sortBy, *order)
+		err := listMovies(db, *sortBy, *order, *filterYear)
 		if err != nil {
 			log.Fatal(err)
 		}
