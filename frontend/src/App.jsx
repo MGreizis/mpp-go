@@ -1,5 +1,6 @@
-import {useState, useEffect} from 'react'
-// import "./output.css"
+import { useState, useEffect } from 'react';
+import MovieCard from './components/MovieCard';
+import MovieModal from './components/MovieModal';
 
 function App() {
   const [movies, setMovies] = useState([]);
@@ -9,10 +10,11 @@ function App() {
     year: '',
     rating: '',
     poster: ''
-  })
+  });
   const [sortBy, setSortBy] = useState('year');
   const [order, setOrder] = useState('asc');
-  const [movieDetails, setMovieDetails] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -27,10 +29,6 @@ function App() {
     fetchMovies();
   }, [sortBy, order]);
 
-  /**
-   * Handles submitting the form for adding a movie.
-   * @param {React.FormEvent<HTMLFormElement>} e - The event object.
-   */
   const handleAddMovie = async (e) => {
     e.preventDefault();
     try {
@@ -46,14 +44,13 @@ function App() {
       if (response.ok) {
         const movie = await response.json();
         setMovies([...movies, movie]);
-        // Reset the form
         setNewMovie({
           imdbId: '',
           title: '',
-          year: 0,
-          rating: 0.0,
+          year: '',
+          rating: '',
           poster: ''
-        })
+        });
       } else {
         console.error('Error adding movie: ', response.statusText);
       }
@@ -63,32 +60,24 @@ function App() {
   };
 
   /**
-   * Handles fetching the movie details by IMDb ID. If the movie can be found,
-   * it updates the movieDetails state with the movie object. If the movie
-   * cannot be found, it logs an error message to the console.
-   * @param {string} imdbID - The IMDb ID of the movie to show the details for.
+   * Show the details of a movie with the given IMDb ID in a modal.
+   * @param {string} imdbID - The IMDb ID of the movie to show.
    */
-  const handleShowDetails = async (imdbID) => {
-    try {
-      const response = await fetch(`http://localhost:8090/movies/${imdbID}`);
-      
-      if (response.ok) {
-        const movie = await response.json();
-        setMovieDetails(movie);
-      } else {
-        console.error('Error fetching movie details: ', response.statusText);
-      }
-    } catch (error) {
-      console.error('Error fetching movie details: ', error);
-    }
-  }
+  const handleShowDetails = (imdbID) => {
+    const movie = movies.find((movie) => movie.imdb_id === imdbID);
+    setSelectedMovie(movie);
+    setIsModalOpen(true);
+  };
 
-  /**
-   * Handles deleting a movie by its IMDb ID. If the movie can be deleted,
-   * it updates the movies state to exclude the movie. If the movie cannot be
-   * deleted, it logs an error message to the console.
-   * @param {string} imdbID - The IMDb ID of the movie to delete.
-   */
+
+/**
+ * Closes the modal and resets the selected movie to null.
+ */
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedMovie(null);
+  };
+
   const handleDeleteMovie = async (imdbID) => {
     try {
       const response = await fetch(`http://localhost:8090/movies/${imdbID}`, {
@@ -173,42 +162,16 @@ function App() {
       </div>
 
       <h1 className="text-3xl font-bold text-center mb-6 text-white">Movie List</h1>
-      <p className="text-center mb-6 text-white">FYI, the details of the movie show up at the bottom of the page :/ (will be fixed soon)</p>
 
-      <ul className="space-y-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {movies.map((movie) => (
-          <li key={movie.imdb_id} className="flex justify-between items-center bg-white p-4 rounded-lg shadow-md">
-            <span>{movie.title}</span>
-            <div className="space-x-4">
-              <button 
-                className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
-                onClick={() => handleShowDetails(movie.imdb_id)}
-              >
-                Details
-              </button>
-              <button 
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
-                onClick={() => handleDeleteMovie(movie.imdb_id)}
-              >
-                Delete
-              </button>
-            </div>
-          </li>
+          <MovieCard key={movie.imdb_id} movie={movie} onShowDetails={handleShowDetails} />
         ))}
-      </ul>
+      </div>
 
-      {movieDetails && (
-        <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-2">Movie Details</h2>
-          <p><strong>IMDb ID:</strong> {movieDetails.imdb_id}</p>
-          <p><strong>Title:</strong> {movieDetails.title}</p>
-          <p><strong>Year:</strong> {movieDetails.year}</p>
-          <p><strong>Rating:</strong> {movieDetails.rating}</p>
-          <p><strong>Poster:</strong> {movieDetails.poster?.Valid ? movieDetails.poster.String : 'No poster available'}</p>
-        </div>
-      )}
+      <MovieModal isOpen={isModalOpen} onClose={handleCloseModal} movie={selectedMovie} />
     </main>
-  )
+  );
 }
 
-export default App
+export default App;
