@@ -25,6 +25,7 @@ const customStyles = {
 
 const MovieModal = ({ isOpen, onClose, movie }) => {
   if (!isOpen || !movie) return null;
+  console.log('fetched movie details for:', movie.title)
 
   return (
     <Modal

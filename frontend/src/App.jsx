@@ -12,24 +12,27 @@ function App() {
     poster: ''
   });
   const [sortBy, setSortBy] = useState('year');
-  const [order, setOrder] = useState('asc');
+  const [order, setOrder] = useState('');
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [moviesPerPage] = useState(15);
+  const [filterYear, setFilterYear] = useState(''); // Filter by year
+  const [filterRating, setFilterRating] = useState(''); // Filter by rating
 
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const response = await fetch(`http://localhost:8090/movies?sort=${sortBy}&order=${order}&page=${currentPage}&limit=${moviesPerPage}`);
+        const response = await fetch(`http://localhost:8090/movies?sort=${sortBy}&order=${order}&year=${filterYear}&rating=${filterRating}`);
         const data = await response.json();
-        setMovies(data);
+        setMovies(data || []); // Ensure movies is always an array
       } catch (error) {
         console.error('Error fetching movies: ', error);
+        setMovies([]); // Set movies to an empty array on error
       }
     };
     fetchMovies();
-  }, [sortBy, order, currentPage, moviesPerPage]);
+  }, [sortBy, order, filterYear, filterRating]);
 
   const handleAddMovie = async (e) => {
     e.preventDefault();
@@ -88,13 +91,19 @@ function App() {
     }
   };
 
+  // Filter movies based on the filter criteria
+  const filteredMovies = (movies || []).filter(movie => {
+    return (filterYear ? movie.year.toString() === filterYear : true) &&
+        (filterRating ? movie.rating.toString() === filterRating : true);
+  });
+
   // Calculate the index of the first and last movie on the current page
   const indexOfLastMovie = currentPage * moviesPerPage;
   const indexOfFirstMovie = indexOfLastMovie - moviesPerPage;
-  const currentMovies = movies.slice(indexOfFirstMovie, indexOfLastMovie);
+  const currentMovies = filteredMovies.slice(indexOfFirstMovie, indexOfLastMovie);
 
   // Calculate total pages
-  const totalPages = Math.ceil(movies.length / moviesPerPage);
+  const totalPages = Math.ceil(filteredMovies.length / moviesPerPage);
 
   // Change page
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
@@ -163,6 +172,29 @@ function App() {
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
+        </div>
+
+        <div>
+          <label className="text-white">Filter by Year: </label>
+          <input
+            type="number"
+            value={filterYear}
+            onChange={(e) => setFilterYear(e.target.value)}
+            className="ml-2 px-2 py-1 rounded"
+            placeholder="Enter year"
+          />
+        </div>
+
+        <div>
+          <label className="text-white">Filter by Rating: </label>
+          <input
+            type="number"
+            step="0.1"
+            value={filterRating}
+            onChange={(e) => setFilterRating(e.target.value)}
+            className="ml-2 px-2 py-1 rounded"
+            placeholder="Enter rating"
+          />
         </div>
       </div>
 
