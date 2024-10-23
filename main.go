@@ -35,8 +35,8 @@ func main() {
 	addYear := addCommand.Int("year", 1894, "The movie's or series' year of release")
 	addImdbRating := addCommand.Float64("rating", 5.7, "The movie's or series' rating on IMDb")
 
-	detailsCommand := flag.NewFlagSet("details", flag.ExitOnError)
-	detailsImdbId := detailsCommand.String("imdbid", "tt0000001", "The IMDb ID of a movie or series")
+	// detailsCommand := flag.NewFlagSet("details", flag.ExitOnError)
+	// detailsImdbId := detailsCommand.String("imdbid", "tt0000001", "The IMDb ID of a movie or series")
 
 	deleteCommand := flag.NewFlagSet("delete", flag.ExitOnError)
 	deleteImdbId := deleteCommand.String("imdbid", "tt0000001", "The IMDb ID of a movie or series")
@@ -67,12 +67,12 @@ func main() {
 		handleListMoviesCLI(db, *sortBy, *order, *filterYear)
 
 	case "details":
-		detailsCommand.Parse(arguments[1:])
-		if *detailsImdbId == "" {
-			fmt.Println("IMDb ID is required")
+		if len(arguments) < 2 {
+			fmt.Println("IMDb ID is required for 'details'")
 			os.Exit(1)
 		}
-		handleShowDetailsCLI(db, *detailsImdbId)
+		imdbID := arguments[1] // directly take the IMDb ID as the second argument
+		handleShowDetailsCLI(db, imdbID)
 
 	case "delete":
 		deleteCommand.Parse(arguments[1:])

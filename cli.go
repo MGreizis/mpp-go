@@ -15,7 +15,7 @@ func handleAddMovieCLI(db *sql.DB, imdbID, title string, year int, rating float6
 		fmt.Println("Error adding movie:", err)
 		return
 	}
-	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: null", imdbID, title, rating, year)
+	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: null\n", imdbID, title, rating, year)
 }
 
 // handleListMoviesCLI lists all movies in the database. It takes the
@@ -44,7 +44,7 @@ func handleShowDetailsCLI(db *sql.DB, imdbID string) {
 		fmt.Println("Error showing movie details:", err)
 		return
 	}
-	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: ", movie.IMDb_id, movie.Title, movie.Rating, movie.Year, movie.Poster)
+	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: %s\n", movie.IMDb_id, movie.Title, movie.Rating, movie.Year, movie.Poster.String)
 }
 
 func handleDeleteMovieCLI(db *sql.DB, imdbID string) {

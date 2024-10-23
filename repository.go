@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -78,8 +79,12 @@ func listMovies(db *sql.DB, sortBy string, order string, filterYear int) ([]Movi
 // It takes the database connection and the IMDb ID of the movie as parameters.
 // It returns the movie details and an error. If the movie is not found, it returns an error indicating that the movie was not found.
 func showMovieDetails(db *sql.DB, imdbID string) (Movie, error) {
+	imdbID = strings.TrimSpace(strings.ToLower(imdbID))
+
 	var movie Movie
-	err := db.QueryRow("SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?", imdbID).Scan(&movie.IMDb_id, &movie.Title, &movie.Rating, &movie.Year, &movie.Poster)
+	query := "SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?"
+
+	err := db.QueryRow(query, imdbID).Scan(&movie.IMDb_id, &movie.Title, &movie.Rating, &movie.Year, &movie.Poster)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return movie, fmt.Errorf("Movie not found")
