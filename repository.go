@@ -182,7 +182,7 @@ func listMovies(db *sql.DB, sortBy string, order string, filterYear int) ([]Movi
 // It takes the database connection and the IMDb ID of the movie as parameters.
 // It returns the movie details and an error. If the movie is not found, it returns an error indicating that the movie was not found.
 func showMovieDetails(db *sql.DB, imdbID string) (Movie, error) {
-	imdbID = strings.TrimSpace(strings.ToLower(imdbID))
+	imdbID = strings.TrimSpace(imdbID)
 
 	var movie Movie
 	query := "SELECT IMDb_id, Title, Rating, Year, Poster FROM movies WHERE IMDb_id = ?"
