@@ -47,6 +47,9 @@ func handleShowDetailsCLI(db *sql.DB, imdbID string) {
 	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: %s\n", movie.IMDb_id, movie.Title, movie.Rating, movie.Year, movie.Poster.String)
 }
 
+// handleDeleteMovieCLI deletes the movie with the given IMDb ID from the database.
+// If the movie cannot be found in the database, it prints an error message.
+// Otherwise, it prints a success message.
 func handleDeleteMovieCLI(db *sql.DB, imdbID string) {
 	err := deleteMovie(db, imdbID)
 	if err != nil {
@@ -56,6 +59,10 @@ func handleDeleteMovieCLI(db *sql.DB, imdbID string) {
 	fmt.Println("Movie deleted")
 }
 
+// handleFetchPostersCLI fetches movie posters concurrently for a specified
+// number of movies without posters in the database. It takes a database
+// connection and a limit on the number of movies to process. If an error
+// occurs during the fetching process, it prints an error message.
 func handleFetchPostersCLI(db *sql.DB, limit int) {
 	const workerCount = 3
 	err := fetchPostersConcurrently(db, workerCount, limit)
@@ -63,4 +70,13 @@ func handleFetchPostersCLI(db *sql.DB, limit int) {
 		fmt.Println("Error fetching posters:", err)
 		return
 	}
+}
+
+func handleUpdatePosterCLI(db *sql.DB, imdbID, posterURL string) {
+	err := updateMoviePoster(db, imdbID, posterURL)
+	if err != nil {
+		fmt.Println("Error updating movie poster:", err)
+		return
+	}
+	fmt.Println("Movie poster updated")
 }
