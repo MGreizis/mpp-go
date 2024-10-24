@@ -44,7 +44,7 @@ func handleShowDetailsCLI(db *sql.DB, imdbID string) {
 		fmt.Println("Error showing movie details:", err)
 		return
 	}
-	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster: %s\n", movie.IMDb_id, movie.Title, movie.Rating, movie.Year, movie.Poster.String)
+	fmt.Printf("IMDb id: %s\nTitle: %s\nRating: %.1f\nYear: %d\nPoster:%s\n", movie.IMDb_id, movie.Title, movie.Rating, movie.Year, movie.Poster.String)
 }
 
 // handleDeleteMovieCLI deletes the movie with the given IMDb ID from the database.
