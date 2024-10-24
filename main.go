@@ -46,6 +46,9 @@ func main() {
 	order := listCommand.String("order", "", "Order 'asc' or 'desc'")
 	filterYear := listCommand.Int("year", 0, "Filter movies by year")
 
+	fetchPostersCommand := flag.NewFlagSet("posters", flag.ExitOnError)
+	posterLimit := fetchPostersCommand.Int("limit", 10, "The maximum number of movies to fetch posters for")
+
 	if len(arguments) == 0 {
 		startServer()
 		return
@@ -61,6 +64,11 @@ func main() {
 	case "add":
 		addCommand.Parse(arguments[1:])
 		handleAddMovieCLI(db, *addImdbId, *addTitle, *addYear, *addImdbRating)
+
+	case "posters":
+		fetchPostersCommand.Parse(arguments[1:])
+		handleFetchPostersCLI(db, *posterLimit)
+		fmt.Println("Posters added")
 
 	case "list":
 		listCommand.Parse(arguments[1:])
@@ -83,7 +91,7 @@ func main() {
 		handleDeleteMovieCLI(db, *deleteImdbId)
 
 	default:
-		fmt.Println("Expected 'add', 'list', 'details' or 'delete' subcommands")
+		fmt.Println("Expected 'add', 'list', 'details', 'delete' or 'posters' subcommands")
 		os.Exit(1)
 	}
 }

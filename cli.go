@@ -55,3 +55,12 @@ func handleDeleteMovieCLI(db *sql.DB, imdbID string) {
 	}
 	fmt.Println("Movie deleted")
 }
+
+func handleFetchPostersCLI(db *sql.DB, limit int) {
+	const workerCount = 3
+	err := fetchPostersConcurrently(db, workerCount, limit)
+	if err != nil {
+		fmt.Println("Error fetching posters:", err)
+		return
+	}
+}

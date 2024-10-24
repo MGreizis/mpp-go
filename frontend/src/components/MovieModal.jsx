@@ -25,7 +25,6 @@ const customStyles = {
 
 const MovieModal = ({ isOpen, onClose, movie }) => {
   if (!isOpen || !movie) return null;
-  console.log('fetched movie details for:', movie.title)
 
   return (
     <Modal
@@ -42,7 +41,7 @@ const MovieModal = ({ isOpen, onClose, movie }) => {
       <p><strong>Title:</strong> {movie.title}</p>
       <p><strong>Year:</strong> {movie.year}</p>
       <p><strong>Rating:</strong> {movie.rating}</p>
-      <p><strong>Poster:</strong> {movie.poster ? <img src={movie.poster} alt={movie.title} className="w-full h-48 object-cover rounded mt-2" /> : 'No poster available'}</p>
+      <p><strong>Poster:</strong> {movie.poster ? <img src={movie.poster} alt={movie.title} className="w-full !h-auto object-cover rounded mt-2" /> : 'No poster available'}</p>
     </Modal>
   );
 }
