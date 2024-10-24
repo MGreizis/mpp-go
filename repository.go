@@ -224,18 +224,3 @@ func deleteMovie(db *sql.DB, imdbID string) error {
 
 	return nil
 }
-
-func updateMoviePoster(db *sql.DB, imdbID, posterURL string) error {
-	stmt, err := db.Prepare("UPDATE movies SET Poster = ? WHERE IMDb_id = ?")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(posterURL, imdbID)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

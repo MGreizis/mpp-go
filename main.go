@@ -49,10 +49,6 @@ func main() {
 	fetchPostersCommand := flag.NewFlagSet("posters", flag.ExitOnError)
 	posterLimit := fetchPostersCommand.Int("limit", 10, "The maximum number of movies to fetch posters for")
 
-	updatePosterCommand := flag.NewFlagSet("updatePoster", flag.ExitOnError)
-	updateImdbId := updatePosterCommand.String("imdbid", "", "The IMDb ID of a movie or series")
-	updatePosterURL := updatePosterCommand.String("url", "", "The URL of the new poster image")
-
 	if len(arguments) == 0 {
 		startServer()
 		return
@@ -93,14 +89,6 @@ func main() {
 			os.Exit(1)
 		}
 		handleDeleteMovieCLI(db, *deleteImdbId)
-
-	case "updatePoster":
-		updatePosterCommand.Parse(arguments[1:])
-		if *updateImdbId == "" || *updatePosterURL == "" {
-			fmt.Println("IMDb ID and URL are required for 'updatePoster'")
-			os.Exit(1)
-		}
-		handleUpdatePosterCLI(db, *updateImdbId, *updatePosterURL)
 
 	default:
 		fmt.Println("Expected 'add', 'list', 'details', 'delete' or 'posters' subcommands")

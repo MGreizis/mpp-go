@@ -71,12 +71,3 @@ func handleFetchPostersCLI(db *sql.DB, limit int) {
 		return
 	}
 }
-
-func handleUpdatePosterCLI(db *sql.DB, imdbID, posterURL string) {
-	err := updateMoviePoster(db, imdbID, posterURL)
-	if err != nil {
-		fmt.Println("Error updating movie poster:", err)
-		return
-	}
-	fmt.Println("Movie poster updated")
-}
