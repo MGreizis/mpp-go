@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,8 +44,6 @@ func handleAddMovie(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid input", http.StatusBadRequest)
 		return
 	}
-
-	fmt.Printf("Received movie: %+v\n", movie)
 
 	db, err := openDB()
 	if err != nil {
