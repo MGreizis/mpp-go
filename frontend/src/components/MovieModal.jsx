@@ -23,7 +23,7 @@ const customStyles = {
   },
 };
 
-const MovieModal = ({ isOpen, onClose, movie }) => {
+const MovieModal = ({ isOpen, onClose, movie, handleDeleteMovie }) => {
   if (!isOpen || !movie) return null;
 
   return (
@@ -42,6 +42,7 @@ const MovieModal = ({ isOpen, onClose, movie }) => {
       <p><strong>Year:</strong> {movie.year}</p>
       <p><strong>Rating:</strong> {movie.rating}</p>
       <p><strong>Poster:</strong> {movie.poster ? <img src={movie.poster} alt={movie.title} className="w-full !h-auto object-cover rounded mt-2" /> : 'No poster available'}</p>
+      <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mt-4" onClick={() => handleDeleteMovie(movie.imdb_id)}>Delete Movie</button>
     </Modal>
   );
 }
@@ -49,6 +50,7 @@ const MovieModal = ({ isOpen, onClose, movie }) => {
 MovieModal.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  handleDeleteMovie: PropTypes.func.isRequired,
   movie: PropTypes.shape({
     imdb_id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,

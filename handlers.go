@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -45,6 +46,8 @@ func handleAddMovie(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("Received movie: %+v\n", movie)
+
 	db, err := openDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -52,9 +55,14 @@ func handleAddMovie(w http.ResponseWriter, r *http.Request) {
 	}
 	defer db.Close()
 
+	if movie.IMDb_id == "" || movie.Title == "" || movie.Year == 0 || movie.Rating == 0 {
+		http.Error(w, "Missing required fields: IMDb ID, Title, Year, or Rating", http.StatusBadRequest)
+		return
+	}
+
 	err = addMovie(db, movie.IMDb_id, movie.Title, movie.Year, movie.Rating)
 	if err != nil {
-		http.Error(w, "Could not add movie", http.StatusInternalServerError)
+		http.Error(w, "Could not add movie"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

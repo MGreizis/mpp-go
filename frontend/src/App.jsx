@@ -5,10 +5,10 @@ import MovieModal from './components/MovieModal';
 function App() {
   const [movies, setMovies] = useState([]);
   const [newMovie, setNewMovie] = useState({
-    imdbId: '',
+    imdb_id: '',
     title: '',
-    year: '',
-    rating: '',
+    rating: 0,
+    year: 0,
     poster: ''
   });
   const [sortBy, setSortBy] = useState('year');
@@ -39,7 +39,7 @@ function App() {
     try {
       const response = await fetch('http://localhost:8090/movies', {
         method: 'POST',
-        mode: 'no-cors',
+        // mode: 'no-cors',
         headers: {
           'Content-Type': 'application/json'
         },
@@ -50,17 +50,18 @@ function App() {
         const movie = await response.json();
         setMovies([...movies, movie]);
         setNewMovie({
-          imdbId: '',
+          imdb_id: '',
           title: '',
-          year: '',
-          rating: '',
+          rating: 0,
+          year: 0,
           poster: ''
         });
       } else {
-        console.error('Error adding movie: ', response.statusText);
+        const errorText = await response.text();
+        console.error('Error adding movie 1: ', errorText || response.statusText || `Status code: ${response.status}`);
       }
     } catch (error) {
-      console.error('Error adding movie: ', error);
+      console.error('Error adding movie 2: ', error.message);
     }
   };
 
@@ -116,8 +117,8 @@ function App() {
         <input
           type='text'
           placeholder='IMDb ID'
-          value={newMovie.imdbId}
-          onChange={(e) => setNewMovie({ ...newMovie, imdbId: e.target.value })}
+          value={newMovie.imdb_id}
+          onChange={(e) => setNewMovie({ ...newMovie, imdb_id: e.target.value })}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
         />
         <input
@@ -129,17 +130,17 @@ function App() {
         />
         <input
           type='number'
-          placeholder='Year'
-          value={newMovie.year}
-          onChange={(e) => setNewMovie({ ...newMovie, year: e.target.value })}
+          step="0.1"
+          placeholder='Rating'
+          value={newMovie.rating}
+          onChange={(e) => setNewMovie({ ...newMovie, rating: parseFloat(e.target.value) })}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
         />
         <input
           type='number'
-          step="0.1"
-          placeholder='Rating'
-          value={newMovie.rating}
-          onChange={(e) => setNewMovie({ ...newMovie, rating: e.target.value })}
+          placeholder='Year'
+          value={newMovie.year}
+          onChange={(e) => setNewMovie({ ...newMovie, year: parseInt(e.target.value, 10) })}
           className="w-full px-4 py-2 border border-gray-300 rounded-lg"
         />
         <input
@@ -226,7 +227,7 @@ function App() {
         </button>
       </div>
 
-      <MovieModal isOpen={isModalOpen} onClose={handleCloseModal} movie={selectedMovie} />
+      <MovieModal isOpen={isModalOpen} onClose={handleCloseModal} movie={selectedMovie} handleDeleteMovie={handleDeleteMovie} />
     </main>
   );
 }

@@ -80,7 +80,7 @@ func updatePosterInDB(db *sql.DB, imdbID, posterURL string) error {
 // If any error occurs while fetching the poster or updating the database, it logs the error and continues with other IDs.
 // Returns an error if there is a problem querying the database for IMDb IDs.
 func fetchPostersConcurrently(db *sql.DB, workerCount int, limit int) error {
-	rows, err := db.Query("SELECT IMDb_id FROM movies WHERE Poster IS NULL LIMIT ?", limit) // If there are DB issues check this line and replace IS NULL with ''
+	rows, err := db.Query("SELECT IMDb_id FROM movies WHERE Poster IS NULL LIMIT ?", limit)
 	if err != nil {
 		return err
 	}
@@ -105,11 +105,13 @@ func fetchPostersConcurrently(db *sql.DB, workerCount int, limit int) error {
 			for imdbID := range imdbChan {
 				posterURL, err := fetchPoster(imdbID)
 				if err != nil {
-					continue
+					fmt.Printf("Worker %d: Error fetching poster for %s: %v\n", workerID, imdbID, err)
+					// continue
 				}
 
 				if err := updatePosterInDB(db, imdbID, posterURL); err != nil {
 					// continue
+					fmt.Printf("Worker %d: Error updating poster for %s: %v\n", workerID, imdbID, err)
 				}
 			}
 		}(i + 1)

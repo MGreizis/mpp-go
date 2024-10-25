@@ -102,6 +102,11 @@ func main() {
 func startServer() {
 	router := mux.NewRouter()
 	router.Use(enableCORS)
+
+	router.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	router.HandleFunc("/movies", handleAddMovie).Methods("POST")
 	router.HandleFunc("/movies", handleListMovies).Methods("GET")
 	router.HandleFunc("/movies/{imdbID}", handleMovieDetails).Methods("GET")
