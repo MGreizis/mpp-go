@@ -109,7 +109,7 @@ func fetchPostersConcurrently(db *sql.DB, workerCount int, limit int) error {
 				}
 
 				if err := updatePosterInDB(db, imdbID, posterURL); err != nil {
-					continue
+					// continue
 				}
 			}
 		}(i + 1)
