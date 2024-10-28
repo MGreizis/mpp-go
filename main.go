@@ -10,22 +10,20 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// main is the entry point of the movie application. It can be run in different
-// modes by providing one of the following subcommands:
+// main is the entry point of the movie db application. It either starts a server
+// (if no arguments are given) or executes a command (if one of the subcommands is
+// given).
 //
-//	add: Adds a movie to the database. The --imdbid, --title, --year, and
-//	     --rating flags are required.
+// The subcommands are:
 //
-//	list: Lists all movies in the database. The --sort, --order, and --year
-//	      flags can be used to filter the results.
-//
-//	details: Shows the details of a movie with the given IMDb ID. The --imdbid
-//	         flag is required.
-//
-//	delete: Deletes a movie with the given IMDb ID from the database. The
-//	        --imdbid flag is required.
-//
-// If no subcommand is provided, the server is started.
+//   - add: adds a movie to the database with the given IMDb ID, title, year of
+//     release, and rating.
+//   - posters: fetches posters for movies without posters in the database. The
+//     number of movies to process can be limited.
+//   - list: lists all movies in the database. The output can be sorted by year or
+//     rating, and filtered by year.
+//   - details: shows the details of a movie with the given IMDb ID.
+//   - delete: deletes the movie with the given IMDb ID from the database.
 func main() {
 	arguments := os.Args[1:] // The first element is the path to the command, so we can skip that
 
