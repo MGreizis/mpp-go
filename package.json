@@ -2,7 +2,7 @@
   "name": "foss-imdb",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"cd backend && ./main\" \"cd frontend && npm run dev\"",
+    "dev": "concurrently \"go build -o main && ./main\" \"cd frontend && npm i && npm run dev\"",
     "build": "cd frontend && npm run build",
     "start:backend": "cd backend && go run main.go",
     "start:frontend": "cd frontend && npm run dev"

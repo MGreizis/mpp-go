@@ -16,6 +16,8 @@ type OMDBAPIResponse struct {
 }
 
 const dbPath = "./movies.db"
+
+// Yes, bad practice, but this needs to be done for CodeGrade to work
 const OMDB_API_KEY = "34e1747c"
 
 // openDB opens a database connection to the SQLite database file at
